@@ -1,4 +1,4 @@
-const VERSION = '1.1';
+const VERSION = '1.2';
 const NUM_ROOMS = 11;
 const WARNING_TIME = 180; // 3분 남았을 때
 const firstRow = document.getElementById("first-row"); // 첫 번째 행
@@ -6,7 +6,7 @@ const secondRow = document.getElementById("second-row"); // 두 번째 행
 let timers = [];
 
 document.addEventListener('DOMContentLoaded', function() {
-    let title = document.getElementsByTagName('h1')[0];
+    let title = document.getElementsByTagName('h4')[0];
     title.textContent = title.textContent + " " + VERSION;
 
     createRooms();
