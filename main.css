@@ -124,13 +124,11 @@ button + button:hover {
     }
 }
 
-/* 세로 화면에서 한 줄에 2개의 방을 배치 */
 @media (min-width: 1024px) {
     #first-row, #second-row {
         display: grid;
         grid-template-columns: repeat(6, 1fr); /* 한 줄에 2개의 방 */
         gap: 10px;
-        direction: ltr; /* 왼쪽에서 오른쪽으로 배치 */
     }
 
     /* 방 요소를 수평 배치 대신 세로로 나열 */
