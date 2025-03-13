@@ -1,4 +1,4 @@
-const VERSION = '1.0';
+const VERSION = '1.1';
 const NUM_ROOMS = 11;
 const WARNING_TIME = 180; // 3분 남았을 때
 const rooms = document.getElementById("rooms");
@@ -9,21 +9,14 @@ document.addEventListener('DOMContentLoaded', function() {
     title.textContent = title.textContent + " " + VERSION;
 
     createRooms();
-
-    restoreTimers();
+    restoreTimers(); // 페이지 로드 시 타이머 상태 복원
 });
 
-// 로컬 저장소에서 기존 데이터 불러오기
-function loadTimers() {
-    const savedData = JSON.parse(localStorage.getItem("timers")) || [];
-    return savedData.length === NUM_ROOMS ? savedData : Array(NUM_ROOMS).fill(null);
-}
-
+// 방 생성
 function createRooms() {
-    // 방 생성
     for (let i = 1; i <= NUM_ROOMS; i++) {
         let div = document.createElement("div");
-        div.className = "room";
+        div.className = "room col-6 col-sm-2";
         div.id = "room" + i;
 
         let input = document.createElement("input");
@@ -47,7 +40,7 @@ function createRooms() {
 
         timers.push({
             element: div,
-            timeLeft: 0,
+            timeLeft: 13 * 60, // 기본값 13분 (초로 변환)
             interval: null,
             input: input,
             display: timerDisplay,
@@ -55,37 +48,78 @@ function createRooms() {
             startTime: null
         });
 
+        // 기본 13:00을 표시하기 위해 초기 상태로 화면 갱신
+        updateDisplay(i - 1);
+
         button.addEventListener("click", () => startTimer(i - 1));
     }
 }
 
+// 기존 타이머 상태 복원
+function restoreTimers() {
+    const savedTimers = loadTimers();
 
-function saveTimers() {
-    localStorage.setItem("timers", JSON.stringify(timers.map(t => t.timeLeft)));
+    savedTimers.forEach((savedTimer, index) => {
+        const timer = timers[index];
+        if (savedTimer && savedTimer.timeLeft !== null) {
+            timer.timeLeft = savedTimer.timeLeft;
+            timer.startTime = savedTimer.startTime;
+            updateDisplay(index);
+
+            if (savedTimer.interval === 'active') {
+                startTimer(index);  // 타이머가 진행 중일 경우 타이머 다시 시작
+            } else {
+                timer.display.textContent = `${Math.floor(timer.timeLeft / 60)}:${timer.timeLeft % 60}`;
+            }
+        }
+    });
 }
 
+// 로컬 저장소에서 기존 데이터 불러오기
+function loadTimers() {
+    const savedData = JSON.parse(localStorage.getItem("timers")) || [];
+    return savedData;
+}
+
+// 로컬 저장소에 타이머 상태 저장
+function saveTimers() {
+    localStorage.setItem("timers", JSON.stringify(timers.map(t => ({
+        timeLeft: t.timeLeft,
+        startTime: t.startTime,
+        interval: t.interval ? 'active' : 'inactive' // 타이머가 진행 중이면 active
+    }))));
+}
+
+// 타이머 시작
 function startTimer(index) {
     let timer = timers[index];
 
     if (timer.interval) clearInterval(timer.interval);
 
-    timer.timeLeft = parseInt(timer.input.value) * 60;
-    timer.startTime = Date.now();
-    saveTimers();
+    timer.timeLeft = parseInt(timer.input.value) * 60; // 입력한 시간(분)을 초로 변환
+    timer.startTime = Date.now(); // 타이머 시작 시간을 현재 시간으로 설정
+    saveTimers(); // 로컬 저장소에 타이머 상태 저장
 
+    // 타이머를 1초 간격으로 갱신
     timer.interval = setInterval(() => {
-        let elapsedTime = Math.floor((Date.now() - timer.startTime) / 1000);
-        timer.timeLeft = Math.max(0, timer.timeLeft - elapsedTime);
-        updateDisplay(index);
+        let elapsedTime = Math.floor((Date.now() - timer.startTime) / 1000); // 경과 시간 계산
+        timer.timeLeft = Math.max(0, timer.timeLeft - elapsedTime); // 남은 시간 갱신
+
+        updateDisplay(index); // 화면에 타이머 표시
 
         if (timer.timeLeft <= 0) {
-            clearInterval(timer.interval);
+            clearInterval(timer.interval); // 타이머 종료 시 interval 정리
             timer.display.textContent = "완료!";
-            // playAlarm();
+            timer.element.classList.remove("started"); // 타이머 종료 후 배경 원래대로
+            saveTimers(); // 타이머 상태 저장 (종료 상태)
         }
     }, 1000);
+
+    // 타이머 시작 시 해당 방에 .started 클래스 추가
+    timer.element.classList.add("started");
 }
 
+// 타이머 화면 표시 업데이트
 function updateDisplay(index) {
     let timer = timers[index];
     let minutes = Math.floor(timer.timeLeft / 60);
@@ -99,18 +133,7 @@ function updateDisplay(index) {
     }
 }
 
-function restoreTimers() {
-    let savedTimers = loadTimers();
-    savedTimers.forEach((time, index) => {
-        if (time !== null) {
-            timers[index].timeLeft = time;
-            timers[index].startTime = Date.now();
-            updateDisplay(index);
-            startTimer(index);
-        }
-    });
-}
-
+// 알람 소리 (선택 사항)
 function playAlarm() {
     var audioContext = new (window.AudioContext || window.webkitAudioContext)();
     var oscillator = audioContext.createOscillator();
