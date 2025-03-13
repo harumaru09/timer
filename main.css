@@ -1,9 +1,8 @@
 #first-row {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    gap: 10px;
     direction: rtl; /* 오른쪽에서 왼쪽으로 배치 */
-    padding-bottom: 50px;
+    padding-bottom: 10px;
 }
 
 /* 첫 번째 행의 방 요소들은 왼쪽에서 오른쪽으로 배치 */
@@ -15,7 +14,6 @@
 #second-row {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    gap: 10px;
     direction: ltr; /* 왼쪽에서 오른쪽으로 배치 */
 }
 
@@ -26,9 +24,8 @@
     border: 1px solid #ddd;
     border-radius: 5px;
     display: inline-block;
-    width: 200px;
+    width: 90px;
     text-align: center;
-    margin-bottom: 100px;
 }
 
 /* 타이머가 진행 중일 때 배경색 처리 */
@@ -58,6 +55,10 @@
 }
 
 /* input을 읽기 전용으로 표시 */
+input {
+    width: 30px;
+}
+
 input[readonly] {
     background-color: #f0f0f0; /* 회색 배경 */
     color: #888; /* 텍스트 색상 */
@@ -118,7 +119,23 @@ button + button:hover {
 
     /* 방 요소를 수평 배치 대신 세로로 나열 */
     .room {
-        width: 100%; /* 각 방이 세로 화면에서 가로를 꽉 채우도록 */
+        width: 80%; /* 각 방이 세로 화면에서 가로를 꽉 채우도록 */
+        margin-bottom: 10px; /* 방 간 간격 */
+    }
+}
+
+/* 세로 화면에서 한 줄에 2개의 방을 배치 */
+@media (min-width: 1024px) {
+    #first-row, #second-row {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr); /* 한 줄에 2개의 방 */
+        gap: 10px;
+        direction: ltr; /* 왼쪽에서 오른쪽으로 배치 */
+    }
+
+    /* 방 요소를 수평 배치 대신 세로로 나열 */
+    .room {
+        width: 80%; /* 각 방이 세로 화면에서 가로를 꽉 채우도록 */
         margin-bottom: 10px; /* 방 간 간격 */
     }
 }
